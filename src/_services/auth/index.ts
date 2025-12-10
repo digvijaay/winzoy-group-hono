@@ -1,11 +1,11 @@
-import UserModel from '@/models/User';
+import UserModel from '../../models/User.js';
 import type { z } from 'zod';
-import type { registerSchema, loginSchema } from '@/validation/auth.z';
-import { signAccessToken, signRefreshToken } from '@/utils/jwt';
-import { setAuthCookies } from '@/utils/cookies';
+import type { registerSchema, loginSchema } from '../../validation/auth.z.js';
+import { signAccessToken, signRefreshToken } from '../../utils/jwt.js';
+import { setAuthCookies } from '../../utils/cookies.js';
 import { Context } from 'hono';
-import db from '@/config/db';
-import { comparePassword } from '@/utils/hash';
+
+import { comparePassword } from '../../utils/hash.js';
 
 type RegisterData = z.infer<typeof registerSchema>;
 type LoginData = z.infer<typeof loginSchema>;
@@ -24,7 +24,6 @@ export const registerUser = async (
   userData: RegisterData
 ): Promise<AuthResponse<{ user: any; token: string }>> => {
   try {
-    db.connect();
     const existingUser = await UserModel.findOne({
       $or: [{ email: userData.email }, { fullName: userData.fullName }],
     });
@@ -42,7 +41,7 @@ export const registerUser = async (
     const { password, ...userJson } = newUser.toJSON();
 
     const payload = {
-      sub: String(newUser.id),
+      sub: String(newUser._id),
       email: newUser.email,
       // tv: newUser.tokenVersion
     };
@@ -72,7 +71,7 @@ export const loginUser = async (
 ): Promise<AuthResponse<{ user: any; token: string }>> => {
   try {
     const { email, password } = credentials;
-    db.connect();
+
     // find user and include password field
     const user = await UserModel.findOne({ email }).select('+password');
 
@@ -93,7 +92,7 @@ export const loginUser = async (
     // generate access token
 
     const payload = {
-      sub: String(userJson.id),
+      sub: String(user._id),
       email: userJson.email,
       // tv: newUser.tokenVersion
     };
