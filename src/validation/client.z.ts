@@ -1,113 +1,120 @@
-import { clientPageName } from '@/utils/enum';
-import { z } from 'zod';
-import { string } from 'zod';
-// Reusable helpers
-export const ObjectIdParam = z.object({
+// src/validation/client.z.ts
+
+import { clientPageName } from '../utils/enum.js';
+import {
+  string,
+  object,
+  number,
+  array,
+  coerce,
+  enum as z_enum,
+  regexes,
+} from 'zod';
+import { urlRegex } from './regex.js';
+
+// --- Reusable helpers ---
+export const objectIdParamValidation = object({
   id: string().regex(/^[a-f\d]{24}$/i, 'Invalid Mongo ObjectId'),
 });
 
-export const PaginationQuery = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
-  q: string().trim().optional(),
-});
-
-// Sub-schemas
-export const CounselorZ = z.object({
+// --- Sub-schemas ---
+export const counselorValidation = object({
   fullName: string().min(1),
-  email: string().email(),
+  email: string().regex(regexes.email, 'Invalid "Counselor" email address.'),
 });
 
-export const CollegeZ = z.object({
+export const collegeValidation = object({
   name: string().min(1),
   course: string().min(1),
   status: string().min(1),
-  page_name: z.enum(clientPageName).default('prospect'),
-  counselor: CounselorZ,
+  page_name: z_enum(clientPageName).default('prospect'),
+  counselor: counselorValidation.optional(),
 });
 
-export const DocumentFileZ = z.object({
+export const documentFileValidation = object({
   name: string().min(1),
-  url: string().url(),
+  url: string().regex(urlRegex, 'Invalid "Document File" URL.'),
 });
 
-export const GeneralInformationZ = z.object({
-  email: string().email(),
+export const generalInformationValidation = object({
+  email: string()
+    .regex(regexes.email, 'Invalid "General Information" email address.')
+    .optional(),
   phone: string().min(1),
-  address: string().min(1),
-  dob: z.coerce.date(),
+  address: string().optional(),
+  dob: coerce.date().optional(),
 });
 
-export const PassportZ = z.object({
+export const passportValidation = object({
   number: string().min(1),
-  expiry: z.coerce.date(),
+  expiry: coerce.date(),
 });
 
-export const VisaZ = z.object({
+export const visaValidation = object({
   visaType: string().min(1),
-  visaExpiry: z.coerce.date(),
+  visaExpiry: coerce.date(),
 });
 
-export const PaymentHistoryZ = z.object({
-  amount: z.number().nonnegative(),
-  date: z.coerce.date(),
+export const paymentHistoryValidation = object({
+  amount: number().nonnegative(),
+  date: coerce.date(),
 });
 
-export const PaymentFeeZ = z.object({
-  applicationFee: z.number().default(0),
-  materialFee: z.number().default(0),
-  tuitionFee: z.number().default(0),
-  offer: z.number().default(0),
-  otherFee: z.number().default(0),
+export const paymentFeeValidation = object({
+  applicationFee: number().default(0),
+  materialFee: number().default(0),
+  tuitionFee: number().default(0),
+  offer: number().default(0),
+  otherFee: number().default(0),
 });
 
-export const PaymentZ = z.object({
-  history: z.array(PaymentHistoryZ).default([]),
-  fee: PaymentFeeZ, // required
+export const paymentValidation = object({
+  history: array(paymentHistoryValidation).default([]),
+  fee: paymentFeeValidation.optional(),
 });
 
-export const RemarkZ = z.object({
+export const remarkValidation = object({
   fullName: string().min(1),
   message: string().min(1),
-  email: string().email(),
-  date: z.coerce.date(),
+  email: string().regex(regexes.email, 'Invalid "Remark" email address.'),
+  date: coerce.date(),
 });
 
-export const ReferenceZ = z.object({
+export const referenceValidation = object({
   fullName: string().min(1),
-  phone: string().min(1),
+  phone: string().optional(),
 });
 
-export const DeletedByZ = z.object({
+export const deletedByValidation = object({
   fullName: string().min(1),
-  email: string().email(),
+  email: string().regex(regexes.email, 'Invalid "Deleted By" email address.'),
   reason: string().min(1),
-  date: z.coerce.date(),
+  date: coerce.date(),
 });
 
-// CREATE schema (full payload)
-export const ClientCreateZ = z.object({
+// --- CREATE schema (full payload) ---
+export const clientCreateValidation = object({
   fullName: string().min(1),
-  colleges: z.array(CollegeZ).default([]),
-  documents: z.array(DocumentFileZ).default([]),
-  generalInformation: GeneralInformationZ,
-  visa: VisaZ,
-  passport: PassportZ,
-  payment: PaymentZ,
-  remarks: z.array(RemarkZ).default([]),
-  reference: ReferenceZ,
-  deletedBy: DeletedByZ.nullable().optional(),
+  colleges: array(collegeValidation).optional(),
+  documents: array(documentFileValidation).default([]),
+  generalInformation: generalInformationValidation,
+  visa: visaValidation.optional(),
+  passport: passportValidation.optional(),
+  payment: paymentValidation.optional(),
+  remarks: array(remarkValidation).default([]),
+  reference: referenceValidation.optional(),
+  deletedBy: deletedByValidation.optional(),
 });
 
-// PUT schema (also full payload; mirrors create)
-export const ClientPutZ = ClientCreateZ;
+// --- PUT schema (mirrors create, can also use partial) ---
+export const clientPutValidation = clientCreateValidation.partial();
 
-// DELETE body for soft-delete
-export const ClientDeleteBodyZ = DeletedByZ;
+// --- DELETE body for soft-delete ---
+export const clientDeleteBodyValidation = deletedByValidation;
 
-// Optional: response schema (basic)
-export const ClientResponseZ = ClientCreateZ.extend({
+// --- Response schema ---
+export const clientResponseValidation = clientCreateValidation.extend({
   _id: string(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
+  createdAt: coerce.date(),
+  updatedAt: coerce.date(),
 });

@@ -1,6 +1,6 @@
 import type { Context, Next } from 'hono';
-import { readAccessCookie } from '../utils/cookies';
-import { verifyAccessToken } from '../utils/jwt';
+import { readAccessCookie } from '../utils/cookies.js';
+import { verifyAccessToken } from '../utils/jwt.js';
 
 export async function authMiddleware(c: Context, next: Next) {
   const token = readAccessCookie(c);

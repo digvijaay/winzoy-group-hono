@@ -12,7 +12,8 @@ const db = {
   connect: async () => {
     try {
       await connect(mongoUri);
-      console.log('✅ MongoDB connected successfully.');
+      process.env.NODE_ENV === 'development' &&
+        console.log('✅ MongoDB connected successfully.');
     } catch (error) {
       console.error('❌ MongoDB connection error:', error);
       process.exit(1);

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { authMiddleware } from '../middleware/auth';
-import { getAllUsers, getUserById } from '../services/user';
+import { authMiddleware } from '../middleware/auth.js';
+import { getAllUsers, getUserById } from '../_services/user/index.js';
 
 const userRouter = new Hono();
 

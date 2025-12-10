@@ -9,3 +9,14 @@ export const clientPageName = [
 ];
 
 export type ClientPageName = (typeof clientPageName)[number];
+
+export const permissionAction = [
+  'create',
+  'read',
+  'update',
+  'delete',
+  'export',
+  'import',
+];
+
+export type PermissionAction = (typeof permissionAction)[number];

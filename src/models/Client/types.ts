@@ -1,6 +1,7 @@
-import { ClientPageName } from '@/utils/enum';
 import { Document } from 'mongoose';
+import { ClientPageName } from '../../utils/enum.js';
 
+// --- Type for nested sub-objects ---
 export interface Counselor {
   fullName: string;
   email: string;
@@ -8,10 +9,10 @@ export interface Counselor {
 
 export interface College {
   name: string;
-  course: string;
-  status: string;
-  page_name: ClientPageName; // added to match schema
-  counselor: Counselor;
+  course?: string;
+  status?: string;
+  page_name: ClientPageName;
+  counselor?: Counselor;
 }
 
 export interface ClientDocumentFile {
@@ -20,10 +21,10 @@ export interface ClientDocumentFile {
 }
 
 export interface GeneralInformation {
-  email: string;
+  email?: string;
   phone: string;
-  address: string;
-  dob: Date;
+  address?: string;
+  dob?: Date;
 }
 
 export interface Passport {
@@ -50,8 +51,8 @@ export interface PaymentFee {
 }
 
 export interface Payment {
-  history: PaymentHistory[];
-  fee: PaymentFee;
+  history?: PaymentHistory[];
+  fee?: PaymentFee;
 }
 
 export interface Remark {
@@ -63,7 +64,7 @@ export interface Remark {
 
 export interface Reference {
   fullName: string;
-  phone: string;
+  phone?: string;
 }
 
 export interface DeletedBy {
@@ -73,20 +74,35 @@ export interface DeletedBy {
   date: Date;
 }
 
-// --- Main interface ---
-export interface IClient {
+// --- 1️⃣ Full Mongoose document type ---
+export interface IClientDocument extends Document {
   fullName: string;
   colleges: College[];
-  documents: ClientDocumentFile[];
+  documents?: ClientDocumentFile[];
   generalInformation: GeneralInformation;
-  visa: Visa;
-  passport: Passport; // added separately (not inside Visa)
-  payment: Payment;
-  remarks: Remark[];
-  reference: Reference;
+  visa?: Visa;
+  passport?: Passport;
+  payment?: Payment;
+  remarks?: Remark[];
+  reference?: Reference;
   deletedBy?: DeletedBy | null;
   createdAt: Date;
-  updatedAt: Date; // timestamps adds this too
+  updatedAt: Date;
 }
 
-export type IClientDocument = IClient & Document;
+// --- 2️⃣ Type for create request (payload) ---
+export interface IClientCreate {
+  fullName: string;
+  colleges?: College[];
+  documents?: ClientDocumentFile[];
+  generalInformation: GeneralInformation;
+  visa?: Visa;
+  passport?: Passport;
+  payment?: Payment;
+  remarks?: Remark[];
+  reference?: Reference;
+  deletedBy?: DeletedBy | null;
+}
+
+// --- 3️⃣ Type for update request (payload) ---
+export interface IClientUpdate extends IClientCreate {}

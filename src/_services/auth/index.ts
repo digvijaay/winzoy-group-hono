@@ -1,6 +1,6 @@
 import UserModel from '@/models/User';
 import type { z } from 'zod';
-import type { registerSchema, loginSchema } from '@/schemas/auth';
+import type { registerSchema, loginSchema } from '@/validation/auth.z';
 import { signAccessToken, signRefreshToken } from '@/utils/jwt';
 import { setAuthCookies } from '@/utils/cookies';
 import { Context } from 'hono';

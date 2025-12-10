@@ -1,5 +1,5 @@
-import db from '@/config/db';
-import User from '../../models/User';
+import db from '../../config/db.js';
+import User from '../../models/User.js';
 
 /**
  * Retrieves a single user's profile by their ID (used for the logged-in user).

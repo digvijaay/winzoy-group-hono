@@ -1,5 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-import { hashPassword } from '../utils/hash';
+import { hashPassword } from '../utils/hash.js';
 
 export interface IUser extends Document {
   fullName: string;
@@ -37,6 +37,7 @@ const userSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
+    // role_id //if user create role required
   },
   {
     timestamps: true,
@@ -44,7 +45,7 @@ const userSchema = new Schema<IUser>(
 );
 
 // Hash password before saving the user
-userSchema.pre<IUser>('save', async function (next) {
+userSchema.pre<IUser>('save', async function (next: any) {
   if (!this.isModified('password') || !this.password) {
     return next();
   }
